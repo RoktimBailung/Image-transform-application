@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Intensity Transformation Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+    window.MathJax = {
+    tex: { inlineMath: [['\\(','\\)'], ['$', '$']] },
+    svg: { fontCache: 'global' }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Image Intensity Transformation Studio</h1>
+    <p class="subtitle">Explore and apply classical image processing techniques interactively.</p>
+    <div class="theme-toggle">
+        <button id="themeButton">🌙</button>
+    </div>
+
+
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+        <input type="file" id="imageInput">
+        <button onclick="uploadImage()">Upload Image</button>
+    </div>
+
+    <!-- Image Preview -->
+    <div class="image-section">
+        <div class="image-box">
+            <h3>Original</h3>
+            <img id="originalImage">
+        </div>
+        <div class="image-box">
+            <h3>Processed</h3>
+            <img id="processedImage">
+            
+            <div class="processed-actions">
+                <button onclick="downloadImage()">Download Image</button>
+                <button onclick="resetImage()" class="reset-btn">Reset</button>
+            </div> 
+        </div>
+
+    </div>
+
+    <!-- Histogram Section -->
+    <section class="histogram-section">
+        <h2>Histogram Analysis</h2>
+
+        <div class="histogram-container">
+            <div class="hist-box">
+                <h4>Original Histogram</h4>
+                <img id="originalHistogram">
+            </div>
+
+            <div class="hist-box">
+                <h4>Processed Histogram</h4>
+                <img id="processedHistogram">
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= NEGATIVE ================= -->
+    <section class="transform-section">
+        <div class="section-content">
+
+            <div class="text-content">
+                <h2>1. Negative Transformation</h2>
+                <p>Inverts intensity values. Useful for highlighting white details in dark regions.
+                    <p class="equation">
+                    \( s = 255 - r \)
+                    </p>
+                </p>
+
+                <div class="try-section">
+                    <button onclick="applyTransform('negative')">Try Negative</button>
+                </div>
+            </div>
+
+            <div class="graph-content">
+                <img class="graph-img" src="{{ url_for('static', filename='graph/negative.jpg') }}">
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ================= LOG ================= -->
+    <section class="transform-section">
+        <div class="section-content">
+
+            <div class="text-content">
+                <h2>2. Log Transformation</h2>
+                <p>Expands dark pixels and compresses bright pixels. Enhances low-intensity regions.
+                    <p class="equation">
+                    \( s = c \log(1 + r) \)
+                    </p>
+                </p>
+
+                <div class="try-section">
+                    <button onclick="applyTransform('log')">Try Log Transform</button>
+                </div>
+            </div>
+
+            <div class="graph-content">
+                <img class="graph-img" src="{{ url_for('static', filename='graph/logtransform.webp') }}">
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ================= GAMMA ================= -->
+    <section class="transform-section">
+        <div class="section-content">
+
+            <div class="text-content">
+                <h2>3. Gamma Transformation</h2>
+                <p>Adjust brightness using gamma correction. Gamma &lt; 1 brightens, Gamma &gt; 1 darkens.
+                    <p class="equation">
+                    \( s = 255 \left(\frac{r}{255}\right)^{\gamma} \)
+                    </p>
+                </p>
+
+                <div class="try-section">
+                    <input type="range" id="gammaSlider" min="0.1" max="5" step="0.1" value="2">
+                    <span id="gammaValue">2</span>
+                    <button onclick="applyGamma()">Apply Gamma</button>
+                </div>
+            </div>
+
+            <div class="graph-content">
+                <img class="graph-img" src="{{ url_for('static', filename='graph/gamma.4.webp') }}">
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ================= THRESHOLD ================= -->
+    <section class="transform-section">
+        <div class="section-content">
+
+            <div class="text-content">
+                <h2>4. Thresholding</h2>
+                <p>Converts grayscale image into binary image based on selected threshold value.
+                    <p class="equation">
+                    \[
+                    s =
+                    \begin{cases}
+                    0 & r < T \\
+                    255 & r \ge T
+                    \end{cases}
+                    \]
+                    </p>
+                </p>
+
+                <div class="try-section">
+                    <input type="range" id="thresholdSlider" min="0" max="255" value="127">
+                    <span id="thresholdValue">127</span>
+                    <button onclick="applyThreshold()">Apply Threshold</button>
+                </div>
+            </div>
+
+            <div class="graph-content">
+                <img class="graph-img" src="{{ url_for('static', filename='graph/threshold.avif') }}">
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ================= CONTRAST ================= -->
+    <section class="transform-section">
+        <div class="section-content">
+
+            <div class="text-content">
+                <h2>5. Contrast Stretching</h2>
+                <p>Expands narrow intensity range to improve image contrast.
+                    <p class="equation">
+                    \( s = \frac{(r - r_{min})}{(r_{max} - r_{min})} \times 255 \)
+                    </p>
+                </p>
+
+                <div class="try-section">
+                    <button onclick="applyTransform('contrast')">Try Contrast Stretch</button>
+                </div>
+            </div>
+
+            <div class="graph-content">
+                <img class="graph-img" src="{{ url_for('static', filename='graph/contraststretching.png') }}">
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
